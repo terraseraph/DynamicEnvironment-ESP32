@@ -5,12 +5,15 @@
 #define MESH_PORT 5555
 #define MESH_CHANNEL 6
 
-#define STATION_SSID "cerberus"
-#define STATION_PASSWORD "Midgar5481"
+#define STATION_SSID "STATION_SSID"
+#define STATION_PASSWORD "STATION_PASSWORD"
 
 #define HOSTNAME "JoatServer"
 #define MQTTENABLE
 #define BRIDGE // to use when files are combined
+
+#define RESTART_FAIL_TIME 200
+#define MESH_FAIL_RESTART_TIME 60
 uint32_t BRIDGE_ID;
 
 int GLOBAL_PIN;

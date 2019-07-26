@@ -179,11 +179,11 @@ void processEventLoop()
   if (NODE_TYPE != "bridge") //run heartbeat if not the bridge
   {
     heartbeatScheduler.execute();
-    if ((millis() - bridgeLastSeen) > 1000 * 180)
+    if ((millis() - bridgeLastSeen) > 1000 * RESTART_FAIL_TIME)
     {
       ESP.restart();
     }
-    if ((millis() - bridgeLastSeenForReset) > 1000 * 60)
+    if ((millis() - bridgeLastSeenForReset) > 1000 * MESH_FAIL_RESTART_TIME)
     {
       mesh_restartMesh();
       bridgeLastSeenForReset = millis();
