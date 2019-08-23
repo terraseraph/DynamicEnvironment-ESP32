@@ -191,6 +191,8 @@ void cmd_functionChange(JsonObject cmd)
   if (validateFunctionChange(msg))
   {
     setNodeType(msg);
+    global_device.NODE_TYPE = msg;
+    spiffs_updateConfig();
     ESP.restart();
   }
 }
@@ -209,6 +211,8 @@ void cmd_setId(JsonObject cmd)
 {
   String msg = cmd["message"];
   setNodeId(msg);
+  global_device.MY_ID = msg;
+  spiffs_updateConfig();
   ESP.restart();
 }
 
@@ -240,6 +244,12 @@ void cmd_branchAddress(JsonObject cmd)
   cmd_addr[2] = command_message_address[2]; // 0
   cmd_addr[3] = command_message_address[3]; // 50
   setBrokerAddress(cmd_addr);
+  global_device.BROKER_ADDRESS[0] = cmd_addr[0];
+  global_device.BROKER_ADDRESS[1] = cmd_addr[1];
+  global_device.BROKER_ADDRESS[2] = cmd_addr[2];
+  global_device.BROKER_ADDRESS[3] = cmd_addr[3];
+  spiffs_updateConfig();
+
   Serial.println("Setting ip to:");
   Serial.print(cmd_addr[0]);
   Serial.print(".");
@@ -286,4 +296,13 @@ bool validateFunctionChange(String msg)
   {
     return false;
   }
+}
+
+String cmd_getHardwareId()
+{
+  char hwID[23];
+  uint64_t chipid = ESP.getEfuseMac(); // The chip ID is essentially its MAC address(length: 6 bytes).
+  uint16_t chip = (uint16_t)(chipid >> 32);
+  snprintf(hwID, 23, "MCUDEVICE-%04X%08X", chip, (uint32_t)chipid);
+  return hwID;
 }

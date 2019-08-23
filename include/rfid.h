@@ -168,7 +168,7 @@ void rfidReadingData()
     Serial.println(" ");
     const char *strBuffer = reinterpret_cast<const char *>(buffer);
     // const char *strUid = reinterpret_cast<const char *>(&(mfrc522.uid));
-    state_createAndSendPacket(MY_ID, "event", "code", "rfid", "noneA", "noneAT", cardId.substring(1));
+    state_createAndSendPacket(global_device.MY_ID, "event", "code", "rfid", "noneA", "noneAT", cardId.substring(1));
 }
 
 void rfidWritingData()

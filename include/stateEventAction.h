@@ -43,7 +43,14 @@ void state_createAndSendPacket(String fromId, String type, String event, String 
   String buffer;
   // root.printTo(buffer);
   serializeJson(root, buffer);
-  mesh.sendSingle(BRIDGE_ID, buffer);
+  if (global_device.MESH_ENABLED)
+  {
+    mesh.sendSingle(BRIDGE_ID, buffer);
+  }
+  if (global_device.MQTT_ENABLED)
+  {
+    sendMqttPacket(buffer);
+  }
   return;
 }
 
@@ -61,6 +68,7 @@ void state_parsePacket(JsonObject root)
   // process data when the action type is known
   const char *state_type = root["state"]["type"]; // "action"
   JsonObject state_message = root["state"]["message"];
+  const char *state_message_pkt = root["state"]["message"];
   const char *state_message_toId = state_message["toId"];
   const char *state_message_wait = state_message["wait"];
   const char *state_message_event = state_message["event"];
@@ -72,8 +80,12 @@ void state_parsePacket(JsonObject root)
 
   //Switch data type depending on action to be completed
   // if (root["toId"] == MY_ID || root["toId"] == String(mesh.getNodeId()))
-  if (strId == MY_ID || root["toId"] == String(mesh.getNodeId()) || String(intId) == MY_ID)
+  if (strId == global_device.MY_ID || root["toId"] == String(mesh.getNodeId()) || String(intId) == global_device.MY_ID)
   {
+    // Send to pins 16/17 custom serial, this is for special action comms
+    serial_sendString(root["state"]["message"]);
+    // serial_write_str(root["state"]["message"]);
+
     Serial.println("Packet for me");
     Serial.println(state_message_actionType);
     if (strcmp(state_message_actionType, "customPin") == 0)

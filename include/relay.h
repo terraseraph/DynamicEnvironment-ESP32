@@ -10,7 +10,6 @@
 // relay Jvcc & gnd -> external supply
 // vcc & pins -> esp32
 //////////////////////////////
-#include "HardwareSerial.h"
 
 #define REL_PIN1 15 // relay pin
 #define REL_PIN2 2
@@ -32,6 +31,7 @@ Task toggleOff(RELAY_TOGGLE_DELAY, 1, &relayToggleOff);
 
 void relay_init()
 {
+  serial_init();
   relayScheduler.init();
   relayScheduler.addTask(toggleOn);
   relayScheduler.addTask(toggleOff);
@@ -67,9 +67,6 @@ void relay_init()
   // pinMode(REL_PIN8, INPUT_PULLUP);
   pinMode(REL_PIN8, OUTPUT);
   digitalWrite(REL_PIN8, HIGH);
-
-  NODE_TYPE = "relay";
-  // setNodeType("relay");
 }
 
 void relayToggleOn()

@@ -1,0 +1,26 @@
+{
+  "HARDWARE": "ESP32",
+  "NODE_TYPE": "relay",
+  "MY_ID": "40",
+  "BRIDGE_ID": "10",
+  "AP_SSID": "****",
+  "AP_PASSWORD": "****",
+  "MESH_SSID": "",
+  "MESH_PASSKEY": "",
+  "md5": "",
+  "BROKER_ADDRESS": [
+    192,
+    168,
+    0,
+    195
+  ],
+  "MQTT_TOPIC_SUBSCRIBE": "10",
+  "MQTT_TOPIC_PUBLISH": "root",
+  "noPart": 0,
+  "partNo": 0,
+  "MESH_ENABLED": false,
+  "HTTP_ENABLED": true,
+  "SERIAL_ENABLED": true,
+  "MQTT_ENABLED": true,
+  "VERSION": "1.0.0"
+}

@@ -92,7 +92,7 @@ void keypad_init()
 {
   Serial.println("Keypad Init");
   _keypad = new Keypad(makeKeymap(keypadKeys), KEYPAD_ROW_PINS, KEYPAD_COL_PINS, KEYPAD_ROWS, KEYPAD_COLS);
-  NODE_TYPE = "keypad";
+  global_device.NODE_TYPE = "keypad";
   keypad_setDebounceTime(150);
 
   memset(keypad_digits, 0, sizeof(keypad_digits));
@@ -139,7 +139,7 @@ bool ProcessKeyPad()
     if (digit_count == KEYPAD_DIGITS || key == '#')
     {
       Serial.println("== sending packet ===");
-      state_createAndSendPacket(MY_ID, "event", "code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
+      state_createAndSendPacket(global_device.MY_ID, "event", "code", "keypad", "noneA", "noneAT", (char *)keypad_digits);
       keypad_messgaeSent = true;
       // clear the pad
       keypad_resetDigits();

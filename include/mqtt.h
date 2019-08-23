@@ -34,7 +34,8 @@ void mqtt_init()
     }
 
     // IPAddress mqttBroker(MQTT_BROKER_ADDRESS[0], MQTT_BROKER_ADDRESS[1], MQTT_BROKER_ADDRESS[2], MQTT_BROKER_ADDRESS[3]);
-    IPAddress mqttBroker(tempMqttAddr[0], tempMqttAddr[1], tempMqttAddr[2], tempMqttAddr[3]);
+    // IPAddress mqttBroker(tempMqttAddr[0], tempMqttAddr[1], tempMqttAddr[2], tempMqttAddr[3]);
+    IPAddress mqttBroker(global_device.BROKER_ADDRESS[0], global_device.BROKER_ADDRESS[1], global_device.BROKER_ADDRESS[2], global_device.BROKER_ADDRESS[3]);
 
     Serial.print("Mqtt broker address:");
     Serial.print(mqttBroker);
@@ -50,7 +51,7 @@ void mqtt_init()
  */
 void processMqtt()
 {
-    mqttMyIP = mqttGetlocalIP();
+    // MQTT is async once started
 }
 
 /**
@@ -76,29 +77,41 @@ void sendMqttPacket(String packet)
 /**
  * Listening to WIFI events to only attempt connection with broker when on a network
  */
+
 void WiFiEvent(WiFiEvent_t event)
 {
     Serial.printf("[WiFi-event] event: %d\n", event);
     switch (event)
     {
     case SYSTEM_EVENT_STA_GOT_IP:
+    {
         Serial.println("WiFi connected");
         Serial.println("IP address: ");
-        if (MQTT_ENABLED)
+        if (global_device.MQTT_ENABLED)
         {
             connectToMqtt();
         }
-        Serial.println(WiFi.localIP());
+        Serial.println("Local IP address : ");
+        Serial.println("global_ip_address : ");
+        global_device.IP_ADDRESS = mqtt_getIpAddress();
+        Serial.println(global_device.IP_ADDRESS);
         break;
+    }
     case SYSTEM_EVENT_STA_DISCONNECTED:
         Serial.println("WiFi lost connection");
-        if (MQTT_ENABLED)
+        if (global_device.MQTT_ENABLED)
         {
             xTimerStop(mqttReconnectTimer, 0); // ensure we don't reconnect to MQTT while reconnecting to Wi-Fi
             xTimerStart(wifiReconnectTimer, 0);
         }
         break;
     }
+}
+
+String mqtt_getIpAddress()
+{
+    String ip = (String(WiFi.localIP()[0]) + "." + String(WiFi.localIP()[1]) + "." + String(WiFi.localIP()[2]) + "." + String(WiFi.localIP()[3]));
+    return ip;
 }
 
 /**
@@ -118,9 +131,11 @@ String createMqttConnectionPacket()
     DynamicJsonDocument root(1024);
     // JsonObject &root = jsonBuffer.createObject();
     root["JOAT_CONNECT"] = true;
-    root["id"] = MY_ID;
-    root["ipAddress"] = mqttMyIP.toString();
-    root["name"] = MY_ID;
+    root["id"] = global_device.MY_ID;
+    root["HardwareId"] = cmd_getHardwareId();
+    root["ipAddress"] = global_device.IP_ADDRESS;
+    root["name"] = global_device.MY_ID;
+    root["type"] = global_device.NODE_TYPE;
     String msg;
     // root.printTo(msg);
     serializeJson(root, msg);
@@ -135,11 +150,6 @@ void sendMqttConnectionPayload()
     sendMqttPacket(connectionPacket);
 }
 
-IPAddress mqttGetlocalIP()
-{
-    return IPAddress(mesh.getStationIP());
-}
-
 void connectToWifi()
 {
     Serial.println("Connecting to Wi-Fi...not really already done!");
@@ -150,10 +160,11 @@ void onMqttConnect(bool sessionPresent)
     Serial.println("Connected to MQTT.");
     Serial.print("Session present: ");
     Serial.println(sessionPresent);
-    uint16_t packetIdSub = mqttClient.subscribe(string2char(MY_ID), 1);
+    uint16_t packetIdSub = mqttClient.subscribe(string2char(global_device.MY_ID), 1);
+    uint16_t packetExtraSub = mqttClient.subscribe(string2char(global_device.MQTT_TOPIC_SUBSCRIBE), 1);
+    uint16_t packetHwIdSub = mqttClient.subscribe(string2char(cmd_getHardwareId()), 1);
+    uint16_t packetIdSubDefault = mqttClient.subscribe(string2char("broadcast"), 1);
     Serial.print("Subscribing at QoS 2, packetId: ");
-    Serial.println(packetIdSub);
-
     sendMqttConnectionPayload();
     // mqttClient.publish("test/lol", 0, true, "test 1");
     //uint16_t mqttClient.publish(const char* topic, uint8_t qos, bool retain, const char* payload = nullptr, size_t length = 0, bool dup = false, uint16_t message_id = 0)
@@ -219,7 +230,7 @@ void onMqttMessage(char *topic, char *payload, AsyncMqttClientMessageProperties 
     String msg = String(payload);
     Serial.println("===== payload =====");
     Serial.println(msg);
-    preparePacketForMesh(mesh.getNodeId(), msg);
+    processReceivedPacket(mesh.getNodeId(), msg);
     sendMqttPacket(readyMessage);
 }
 
@@ -238,9 +249,10 @@ void asyncMqttSetup()
     mqttReconnectTimer = xTimerCreate("mqttTimer", pdMS_TO_TICKS(2000), pdFALSE, (void *)0, reinterpret_cast<TimerCallbackFunction_t>(connectToMqtt));
     wifiReconnectTimer = xTimerCreate("wifiTimer", pdMS_TO_TICKS(2000), pdFALSE, (void *)0, reinterpret_cast<TimerCallbackFunction_t>(connectToWifi));
 
-    IPAddress mqttBroker(tempMqttAddr[0], tempMqttAddr[1], tempMqttAddr[2], tempMqttAddr[3]);
+    // IPAddress mqttBroker(tempMqttAddr[0], tempMqttAddr[1], tempMqttAddr[2], tempMqttAddr[3]);
     // IPAddress mqttBroker(MQTT_BROKER_ADDRESS[0], MQTT_BROKER_ADDRESS[1], MQTT_BROKER_ADDRESS[2], MQTT_BROKER_ADDRESS[3]);
-    char *clientId = const_cast<char *>(MY_ID.c_str());
+    IPAddress mqttBroker(global_device.BROKER_ADDRESS[0], global_device.BROKER_ADDRESS[1], global_device.BROKER_ADDRESS[2], global_device.BROKER_ADDRESS[3]);
+    char *clientId = const_cast<char *>(global_device.MY_ID.c_str());
     mqttClient.onConnect(onMqttConnect);
     mqttClient.onDisconnect(onMqttDisconnect);
     mqttClient.onSubscribe(onMqttSubscribe);

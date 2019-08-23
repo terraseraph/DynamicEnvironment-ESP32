@@ -59,16 +59,17 @@ void setNodeId(String val)
 
 String getMyId()
 {
-  EEPROM.begin(EEPROM_SIZE);
-  String type = (EEPROM.readString(NODE_ID_START)); // the offset from the other addresses
-  return type;
+  // EEPROM.begin(EEPROM_SIZE);
+  // String type = (EEPROM.readString(NODE_ID_START)); // the offset from the other addresses
+  // return type;
+  return global_device.MY_ID;
 }
 
 void setNodeType(String type)
 {
   //  NodeType nt;
   int val;
-  NODE_TYPE = type;
+  global_device.NODE_TYPE = type;
   if (type == "relay")
   {
     val = TYPE_RELAY;
