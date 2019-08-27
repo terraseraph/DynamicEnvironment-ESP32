@@ -8,12 +8,7 @@
   "MESH_SSID": "",
   "MESH_PASSKEY": "",
   "md5": "",
-  "BROKER_ADDRESS": [
-    192,
-    168,
-    0,
-    195
-  ],
+  "BROKER_ADDRESS": [192, 168, 0, 195],
   "MQTT_TOPIC_SUBSCRIBE": "10",
   "MQTT_TOPIC_PUBLISH": "root",
   "noPart": 0,

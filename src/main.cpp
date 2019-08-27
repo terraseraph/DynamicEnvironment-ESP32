@@ -82,6 +82,7 @@ void setup()
 void loop()
 {
   serialEvent();
+  commonLoopProcess();
   processEventLoop();
 }
 

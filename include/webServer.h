@@ -171,6 +171,30 @@ void webServer_init()
             // free(data);
         });
 
+    // Upload a new config file
+    server.on(
+        "/config",
+        HTTP_POST,
+        [](AsyncWebServerRequest *request) {},
+        NULL,
+        [](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+            request->send(200);
+            if (!index) //new body
+            {
+                body = (char *)data;
+            }
+            else
+            {
+                body = body + (char *)data;
+            }
+            if (index + len == total)
+            {
+                spiffs_writeStringToConfig(body);
+                Serial.println(body);
+                ESP.restart();
+            }
+        });
+
     server.on("/update", HTTP_GET, [](AsyncWebServerRequest *request) { handleUpdate(request); });
     server.on("/doUpdate", HTTP_POST,
               [](AsyncWebServerRequest *request) {},
