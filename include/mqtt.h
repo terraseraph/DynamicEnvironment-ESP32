@@ -8,6 +8,9 @@ AsyncMqttClient mqttClient;
 TimerHandle_t mqttReconnectTimer;
 TimerHandle_t wifiReconnectTimer;
 
+long mqttLastAlive = 0;
+long mqttRestartAfterTimeout = TASK_SECOND * 30;
+
 IPAddress mqttGetlocalIP();
 IPAddress mqttMyIP(0, 0, 0, 0);
 
@@ -52,6 +55,19 @@ void mqtt_init()
 void processMqtt()
 {
     // MQTT is async once started
+
+    // Restart esp if connection has a timeout
+    if (!mqttClient.connected())
+    {
+        if ((millis() - mqttLastAlive) > mqttRestartAfterTimeout)
+        {
+            ESP.restart();
+        }
+    }
+    else
+    {
+        mqttLastAlive = millis();
+    }
 }
 
 /**
@@ -175,6 +191,10 @@ void connectToMqtt()
 {
     Serial.println("Connecting to MQTT...");
     mqttClient.connect();
+    if (mqttClient.connected())
+    {
+        mqttLastAlive = millis();
+    };
 }
 
 void onMqttDisconnect(AsyncMqttClientDisconnectReason reason)

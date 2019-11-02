@@ -107,7 +107,7 @@ void moveServo(int servoNumber)
 
 bool servoTimeBufferComplete()
 {
-    if ((servoTimeBuffer - millis()) < SERVO_TIME_BUFFER)
+    if ((millis() - servoTimeBuffer) < SERVO_TIME_BUFFER)
     {
         return false;
     }
