@@ -9,18 +9,27 @@ NLinkedList<String> serialBufferList = NLinkedList<String>();
 
 void serial_init()
 {
-    customSerial.begin(9600, SERIAL_8N1, SERIAL_RX, SERIAL_TX);
-    serial_ready = true;
+    if (global_device.SERIAL_ENABLED)
+    {
+
+        customSerial.begin(9600, SERIAL_8N1, SERIAL_RX, SERIAL_TX);
+        serial_ready = true;
+    }
 }
 
 // Add the message to the serial buffer list
-void serial_sendString(String msg){
-    serialBufferList.add(msg);
-    serial_hasMessages = true;
+void serial_sendString(String msg)
+{
+    if (global_device.SERIAL_ENABLED)
+    {
+        serialBufferList.add(msg);
+        serial_hasMessages = true;
+    }
 }
 
 // Send the 0th item to the serial port, then pop the item off
-void serial_sendListItem(){
+void serial_sendListItem()
+{
     customSerial.println(serialBufferList.get(0));
     Serial.print("Serial : ");
     Serial.println(serialBufferList.size());
@@ -36,19 +45,22 @@ void serial_processLoop()
     {
         // Do stuff from the serial port
     }
-    if(serial_hasMessages){
+    if (serial_hasMessages)
+    {
         // Send the next message
-        if(serialBufferList.size() > 0){
-            if((millis() - serial_sendTimer) > 500){
+        if (serialBufferList.size() > 0)
+        {
+            if ((millis() - serial_sendTimer) > 500)
+            {
                 serial_sendListItem();
                 serial_sendTimer = millis();
             }
         }
-        else{
+        else
+        {
             serial_hasMessages = false;
         }
     }
-
 }
 
 void serial_write_str(String msg)

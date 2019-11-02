@@ -121,6 +121,14 @@ void cmd_customPinInit(JsonObject cmd);
 void cmd_customPinToggle(JsonObject cmd);
 String cmd_getHardwareId();
 
+// SERVO
+void servo_init();
+void servo_processLoop();
+void servo_moveToPositionDegrees(int servoNo, int degrees, int all);
+bool servoTimeBufferComplete();
+void moveServo(int servoNumber);
+void servo_processAction(int servoNo, int moveTo, int all, int servoStepSize);
+
 //OTA
 void otaReceiveUpdate(JsonObject root);
 

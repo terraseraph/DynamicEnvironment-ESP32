@@ -83,7 +83,10 @@ void state_parsePacket(JsonObject root)
   if (strId == global_device.MY_ID || root["toId"] == String(mesh.getNodeId()) || String(intId) == global_device.MY_ID)
   {
     // Send to pins 16/17 custom serial, this is for special action comms
-    serial_sendString(root["state"]["message"]);
+    if (global_device.SERIAL_ENABLED)
+    {
+      serial_sendString(root["state"]["message"]);
+    }
     // serial_write_str(root["state"]["message"]);
 
     Serial.println("Packet for me");
@@ -97,6 +100,27 @@ void state_parsePacket(JsonObject root)
     {
       int data = root["state"]["message"]["data"];
       processRelayAction(state_message_action, data);
+    }
+    if (strcmp(state_message_actionType, "servo") == 0)
+    {
+      uint8_t invalid = -1;
+      int servoNo = root["state"]["message"]["data"][0] | invalid;
+      int moveTo = root["state"]["message"]["data"][1] | invalid;
+      int moveAll = root["state"]["message"]["data"][2] | invalid;
+      int servoStepSize = root["state"]["message"]["data"][3] | invalid;
+      if (servoNo == invalid && moveTo == invalid && moveAll == invalid)
+      {
+        const size_t CAPACITY = JSON_ARRAY_SIZE(3);
+        String arrStr = root["state"]["message"]["data"];
+        StaticJsonDocument<CAPACITY> doc;
+        deserializeJson(doc, arrStr);
+        JsonArray arr = doc.as<JsonArray>();
+        servoNo = arr[0];
+        moveTo = arr[1];
+        moveAll = arr[2];
+        servoStepSize = arr[3];
+      }
+      servo_processAction(servoNo, moveTo, moveAll, servoStepSize);
     }
     else if (strcmp(state_message_actionType, "mp3") == 0)
     {

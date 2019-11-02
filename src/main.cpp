@@ -15,15 +15,17 @@
 #include <painlessMesh.h>
 #include <HardwareSerial.h>
 #include <Bounce2.h>
+#include <Servo.h>
 #include "LinkedList.h"
-#include "serialComms.h"
 #include "ota.h"
 #include "globals.h"
+#include "serialComms.h"
 #include "joatSpiffs.h"
 #include "mesh.h"
 #include "joatEEPROM.h"
 #include "joatWiFi.h"
 #include "commands.h"
+#include "espServo.h"
 #include "mp3Player.h"
 #include "stateEventAction.h"
 #include "webServer.h"
@@ -136,6 +138,10 @@ void startupInitType()
   {
     MP3_init();
   };
+  if (global_device.NODE_TYPE == "servo")
+  {
+    servo_init();
+  };
   //======= Custom ====================//
   if (global_device.NODE_TYPE == "phone")
   {
@@ -200,6 +206,10 @@ void processEventLoop()
   if (global_device.NODE_TYPE == "mp3")
   {
     processMp3Loop();
+  };
+  if (global_device.NODE_TYPE == "servo")
+  {
+    servo_processLoop();
   };
   //======= Custom ====================//
   if (global_device.NODE_TYPE == "phone")
