@@ -89,6 +89,10 @@ void cmd_parseCommand(JsonObject root)
   {
     cmd_customPinToggle(command);
   }
+  if (command["type"] == "wifi")
+  {
+    cmd_setWifi(command);
+  }
 }
 
 // Parse Broadcast commands
@@ -260,6 +264,16 @@ void cmd_branchAddress(JsonObject cmd)
   Serial.println(cmd_addr[3]);
 
   ESP.restart();
+}
+
+void cmd_setWifi(JsonObject cmd)
+{
+  String ssid = cmd["message"]["ssid"];
+  String password = cmd["message"]["password"];
+
+  global_device.AP_SSID = ssid;
+  global_device.AP_PASSWORD = password;
+  spiffs_updateConfig();
 }
 
 void cmd_mqttMode(JsonObject cmd)

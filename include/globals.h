@@ -120,6 +120,7 @@ String cmd_create_bridgeId(uint32_t nodeId, bool broadcast);
 void cmd_customPinInit(JsonObject cmd);
 void cmd_customPinToggle(JsonObject cmd);
 String cmd_getHardwareId();
+void cmd_setWifiSSID(JsonObject cmd);
 
 // SERVO
 void servo_init();
