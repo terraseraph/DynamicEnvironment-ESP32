@@ -62,8 +62,14 @@ Task taskBridgeId(TASK_SECOND * 20, TASK_FOREVER, &taskBroadcastBridgeId);
 //===== Setup =================//
 //============================//
 
+ #include "soc/soc.h"
+#include "soc/rtc_cntl_reg.h"
+
 void setup()
 {
+  delay(100);
+  // WRITE_PERI_REG(RTC_CNTL_BROWN_OUT_REG, 0);
+  btStop();
   Serial.begin(115200);
 
   // Load config from spiffs
